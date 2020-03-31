@@ -32,10 +32,23 @@ const GameScreen = props => {
   const initialGuess = generateRandomBetween(1, 100, props.userChoice);
   const [currentGuess, setCurrentGuess] = useState(initialGuess);
   const [pastGuesses, setPastGuesses] = useState([initialGuess]);
+  const [deviceWidth, setDeviceWidth] = useState(Dimensions.get('window').width)
+  const [deviceHeight, setDeviceHeight] = useState(Dimensions.get('window').height)
   const currentLow = useRef(1);
   const currentHigh = useRef(100);
   
   const { userChoice, onGameOver } = props;
+
+  useEffect(() => {
+    const updateLayout = () => {
+      setDeviceWidth(Dimensions.get('window').width)
+      setDeviceHeight(Dimensions.get('window').height)
+    }
+    Dimensions.addEventListener('change', updateLayout)
+    return () => {
+      Dimensions.removeEventListener('change', updateLayout)
+    }
+  }, [])
 
   useEffect(() => {
     if (currentGuess === userChoice) {
@@ -63,8 +76,31 @@ const GameScreen = props => {
 
   let listContainerStyle = styles.listContainer;
 
-  if (Dimensions.get('window').width < 350) {
+  if (deviceWidth < 350) {
     listContainerStyle = styles.listContainerBig
+  }
+
+  if (deviceHeight < 500) {
+    return (
+      <View style={styles.screen}>
+        <Text style={DefaultStyles.title}>Computer guess</Text>
+        <NumberContainer>{currentGuess}</NumberContainer>
+        <View style={styles.controls}>
+          <MainButton onPress={nextGuessHandler.bind(this, 'lower')}>
+            <Ionicons name="md-remove" size={24} color='white'/>
+          </MainButton>
+          <MainButton onPress={nextGuessHandler.bind(this, 'higher')}>
+            <Ionicons name="md-add" size={24} color='white'/>
+          </MainButton>
+        </View>
+        
+        <View style={listContainerStyle}>
+          <ScrollView contentContainerStyle={styles.list}>
+            {pastGuesses.map((guess, index) => renderListItem(guess, pastGuesses.length - index))}
+          </ScrollView>
+        </View>
+    </View>
+    )
   }
 
   return (
@@ -123,6 +159,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     flexGrow: 1
+  },
+  controls: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '80%',
+    alignItems: 'center'
   }
 })
 
