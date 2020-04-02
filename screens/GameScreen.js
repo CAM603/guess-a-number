@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, Button, Alert, ScrollView, Dimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons';
+import { ScreenOrientation } from 'expo';
 
 import NumberContainer from '../components/NumberContainer';
 import Card from '../components/Card';
@@ -29,6 +30,9 @@ const renderListItem = (value, numOfRound) => {
 }
 
 const GameScreen = props => {
+  // This locks the screen in portrait when you reach GameScreen
+  ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
+
   const initialGuess = generateRandomBetween(1, 100, props.userChoice);
   const [currentGuess, setCurrentGuess] = useState(initialGuess);
   const [pastGuesses, setPastGuesses] = useState([initialGuess]);
@@ -107,7 +111,7 @@ const GameScreen = props => {
     <View style={styles.screen}>
       <Text style={DefaultStyles.title}>Computer guess</Text>
         <NumberContainer>{currentGuess}</NumberContainer>
-        <Card style={styles.buttonContainer}>
+        <Card style={[...styles.buttonContainer, {marginTop: deviceHeight > 600 ? 20 : 5}]}>
           <MainButton onPress={nextGuessHandler.bind(this, 'lower')}>
             <Ionicons name="md-remove" size={24} color='white'/>
           </MainButton>
@@ -133,7 +137,6 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginTop: Dimensions.get('window').height > 600 ? 20 : 5,
     width: 400,
     maxWidth: '90%'
   },
